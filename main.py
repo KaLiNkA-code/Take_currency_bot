@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from telebot import types  # Импортируем типы из модуля, чтобы создавать кнопки
 import telebot  # Подключаем модуль для Телеграма
-bot = telebot.TeleBot('2052572267:AAESJ1ffIJQmINdV3Snh9LS6rcc005KVE9Y')  # Указываем токен
+bot = telebot.TeleBot('key')  # Указываем токен
 first = [""]
 second = [""]
 second_add = [""]
