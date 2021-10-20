@@ -1,7 +1,9 @@
+import currency_translator
 import requests
 from bs4 import BeautifulSoup
 from telebot import types  # Импортируем типы из модуля, чтобы создавать кнопки
 import telebot  # Подключаем модуль для Телеграма
+
 bot = telebot.TeleBot('2052572267:AAESJ1ffIJQmINdV3Snh9LS6rcc005KVE9Y')  # Указываем токен
 first = [""]
 second = [""]
@@ -155,7 +157,6 @@ def inline(c):
 
     """Обработка стран)"""
     if c.data == 'Rus_c':
-        result = main('d')
         bot.send_message(c.message.chat.id, f"Оснавная валюта, это рубль. Он бесценен!")
     if c.data == 'USA_c':
         result = main('d')
@@ -284,175 +285,59 @@ def inline(c):
 class Currency:
     """Класс для работ по курсу"""
 
-    # Доллар
-    DOLLAR_RUB = 'https://www.google.com/search?sxsrf=ALeKk01NWm6viYijAo3HXYOEQUyDEDtFEw%3A1584716087546&source=hp&ei' \
-                 '=N9l0XtDXHs716QTcuaXoAg&q=%D0%B4%D0%BE%D0%BB%D0%BB%D0%B0%D1%80+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8' \
-                 'E&oq=%D0%B4%D0%BE%D0%BB%D0%BB%D0%B0%D1%80+&gs_l=psy-ab.3.0.35i39i70i258j0i131l4j0j0i131l4.3044.4178' \
-                 '..5294...1.0..0.83.544.7......0....1..gws-wiz.......35i39.5QL6Ev1Kfk4'
-    # Евро
-    EURO_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B5%D0%B2%D1%80%D0%BE&sxsrf=AOaemvLc9wYK9' \
-               'YrHk5_951xFa52ILPTNkw%3A1633593073190&ei=8aZeYZj_CrHMrgSW9ZOoBA&oq=%D0%BA%D1%83%D1%80%D1%81+%D0%B5%D0' \
-               '%B2%D1%80%D0%BE&gs_lcp=Cgdnd3Mtd2l6EAMYAzIECCMQJzIECCMQJzIECCMQJzIICAAQgAQQsQMyCwgAEIAEELEDEIMBMgsIAB' \
-               'CABBCxAxCDATILCAAQgAQQsQMQgwEyBQgAEIAEMgUIABCABDILCAAQgAQQsQMQgwE6BwgjEOoCECc6DgguEIAEELEDEMcBENEDOgU' \
-               'ILhCABDoICAAQsQMQgwE6CAguEIAEELEDSgUIPBIBM0oECEEYAFDzQ1jvVmDicGgFcAJ4AIABc4gBtASSAQM1LjKYAQCgAQGwAQrA' \
-               'AQE&sclient=gws-wiz'
-    # Юань
-    CNY_RUB = 'https://www.google.com/search?q=%D1%8E%D0%B0%D0%BD%D1%8C+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&rlz=1C1' \
-              'CHBD_ruRU893RU893&oq=%D1%8E%D0%B0%D0%BD%D1%8C&aqs=chrome.1.69i57j0i67i433j0i67i131i433j0i67l3j0i512j46' \
-              'i512j0i512l2.2165j0j15&sourceid=chrome&ie=UTF-8'
-    # Дирхам
-    DIR_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B4%D0%B8%D1%80%D1%85%D0%B0%D0%BC%D0%B0' \
-              '+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&oq=%D0%BA%D1%83%D1%80%D1%81+%D0%B4%D0' \
-              '%B8%D1%80&aqs=chrome.0.0i512l4j69i57j0i512j0i10i512j0i512j0i10i512j0i512.3583j1j15&sourceid=chrome&ie' \
-              '=UTF-8 '
-    # Драм
-    DRA_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B4%D1%80%D0%B0%D0%BC+%D0%BA+%D1%80%D1%83' \
-              '%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvIqGqOHoOjnekOMOdoxahijMfKt1g%3A1633949152235' \
-              '&ei=4BVkYbDgDau1qtsPu42i6A4&oq=%D0%BA%D1%83%D1%80%D1%81+%D0%B4%D1%80%D0%B0%D0%BC+%D0%BA+%D1%80%D1%83' \
-              '%D0%B1%D0%BB%D1%8E&gs_lcp' \
-              '=Cgdnd3Mtd2l6EAEYADIECAAQDTIECAAQDTIECAAQDTIECAAQDTIICAAQCBANEB4yCAgAEAgQDRAeMggIABAIEA0QHjIICAAQCBA' \
-              'NEB46BwgAEEcQsAM6BwgAELADEEM6EAguEMcBEKMCEMgDELADEEM6EAguEMcBENEDEMgDELADEEM6CAgAEAcQChAeOgYIABAHEB5' \
-              'KBQg4EgExSgQIQRgAULXjBFjR7wRgkfsEaAFwAngAgAFSiAHsApIBATWYAQCgAQHIAQvAAQE&sclient=gws-wiz'
-    # Лира
-    LIR_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%BB%D0%B8%D1%80%D0%B0+%D0%BA+%D1%80%D1%8' \
-              '3%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvIbIWGajmtXs7g-cDHyq9Igyf6R-w%3A1633949235285' \
-              '&ei=MxZkYbiAEZCdrgTwgZXgDg&oq=%D0%BA%D1%83%D1%80%D1%81+%D0%BB%D0%B8%D1%80%D0%B0+%D0%BA+%D1%80%D1%83%' \
-              'D0%B1%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAEYADIECAAQDTIECAAQDTIECAAQDTIGCAAQDRAeMgYIABANEB4yBggAEA0QHjII' \
-              'CAAQDRAFEB4yCAgAEA0QBRAeMggIABAIEA0QHjIICAAQCBANEB46BwgAEEcQsAM6BwgAELADEEM6BggAEAcQHkoECEEYAFCulw1Y' \
-              'rp4NYOypDWgBcAJ4AIABY4gB9QOSAQE2mAEAoAEByAEKwAEB&sclient=gws-wiz'
-    # Песо
-    PES_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%BF%D0%B5%D1%81%D0%BE+%D0%BA+%D1%80%D1%8' \
-              '3%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvIbfojRwOKFI-7PQR_SMhMLCWr89w%3A163394945440' \
-              '6&ei=DhdkYaqRGOzErgSLgo-oAg&ved=0ahUKEwiq0L2GmMLzAhVsoosKHQvBAyUQ4dUDCA4&uact=5&oq=%D0%BA%D1%83%D1%8' \
-              '0%D1%81+%D0%BF%D0%B5%D1%81%D0%BE+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEI' \
-              'AEMgUIABCABDIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAgQHjIGCAAQCBAeMgYIABAIEB46Bwg' \
-              'AEEcQsAM6BwgAELADEEM6BAgAEA06CAgAEAgQBxAeSgQIQRgAUOvjCljG5wpg6ekKaAFwAngAgAFPiAGYApIBATSYAQCgAQHIAQrAA' \
-              'QE&sclient=gws-wiz'
-    # Бат
-    BAT_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B1%D0%B0%D1%82%D1%82+%D0%BA+%D1%80%D1%83' \
-              '%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvIbsD4EeeQ7aSppE4ZwCXKMJoPhWA%3A1633949632520&' \
-              'ei=wBdkYe6nH-birgSBjozYCw&ved=0ahUKEwjuh7XbmMLzAhVmsYsKHQEHA7sQ4dUDCA4&uact=5&oq=%D0%BA%D1%83%D1%80%D' \
-              '1%81+%D0%B1%D0%B0%D1%82%D1%82+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAMyCQgAEAoQRh' \
-              'CCAjIECAAQCjIECAAQCjIECAAQCjIECAAQCjIECAAQCjIECAAQCjIECAAQCjIECAAQCjIECAAQCjoHCAAQRxCwAzoHCAAQsAMQQzo' \
-              'GCAAQBxAeOgQIABANOgUIABCABEoECEEYAFCqwwRY08YEYNfIBGgBcAJ4AIABZ4gBuwKSAQMzLjGYAQCgAQHIAQrAAQE&sclient=' \
-              'gws-wiz'
-    # Фунт стерлингов
-    FST_RUB = 'https://www.google.ru/search?q=%D0%BA%D1%83%D1%80%D1%81+%D1%84%D1%83%D0%BD%D1%82+%D1%81%D1%82%D0%B5%D1' \
-              '%80%D0%BB%D0%B8%D0%BD%D0%B3%D0%B0+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&newwindow=1&sxsrf=AOaemvJjnoIl' \
-              'AnrpQDRDtyQVYPbwisyavg%3A1633955192204&ei=eC1kYb2FDOKErwTHgoOABQ&oq=%D0%BA%D1%83%D1%80%D1%81+%D1%84%D1' \
-              '%83%D0%BD%D1%82+%D1%81%D1%82%D0%B5%D1%80%D0%BB%D0%B8%D0%BD%D0%B3%D0%B0+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB' \
-              '%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAMYADIJCCMQJxBGEIICMgoIABCABBCHAhAUMggIABCABBCxAzIFCAAQgAQyBQgAEIAEMgUIABCA' \
-              'BDIFCAAQgAQyBQgAEIAEMgUIABCABDIFCAAQgAQ6BwgjEOoCECc6CwgAEIAEELEDEIMBOg4ILhCABBCxAxDHARCjAjoECCMQJzoEC' \
-              'AAQQzoHCAAQsQMQQzoHCAAQyQMQQzoNCAAQgAQQhwIQsQMQFEoECEEYAFDBJljbOGDtPWgBcAJ4AIABaYgB9ASSAQM3LjGYAQCgAQG' \
-              'wAQrAAQE&sclient=gws-wiz'
-    # Швецарский франк
-    SHF_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+idtwfhcrbq+ahfyr+%D0%BA+%D1%80%D1%83%D0%B1%D0' \
-              '%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvKW8a95ox1av70KeBF14JqaF5KDwg%3A1633949798312&ei=ZhhkYc2' \
-              '1EpLargSYobfQBg&ved=0ahUKEwjNgLyqmcLzAhUSrYsKHZjQDWoQ4dUDCA4&uact=5&oq=%D0%BA%D1%83%D1%80%D1%81+idtwfh' \
-              'crbq+ahfyr+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAMyCQgAEA0QRhCCAjIICAAQDRAFEB4yCA' \
-              'gAEAgQDRAeOgcIABBHELADOgYIABAHEB46BAgAEA06BQgAEM0CSgQIQRgAUJDCBVi86wVg1-wFaANwAngAgAGWAYgB1AqSAQQxNC4y' \
-              'mAEAoAEByAEIwAEB&sclient=gws-wiz'
-    # Иена
-    IEN_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B8%D0%B5%D0%BD+%D0%BA+%D1%80%D1%83%D0%B1%' \
-              'D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvJonlm3PLmMMHDdPj3Ts5Dm1uEZDA%3A1633949895013&ei=xxhkY' \
-              'acO7KOuBIqRofAL&oq=%D0%BA%D1%83%D1%80%D1%81+%D0%B8%D0%B5%D0%BD+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&g' \
-              's_lcp=Cgdnd3Mtd2l6EAMYADIECAAQDTIECAAQDTIGCAAQDRAeMgYIABANEB4yBggAEA0QHjIICAAQDRAFEB4yCAgAEAgQDRAeMgoI' \
-              'ABAIEA0QChAeOgcIABBHELADOgYIABAHEB46CAgAEAcQChAeSgQIQRgAUNHIBFjiywRg7NoEaABwAngAgAFpiAHxAZIBAzIuMZgBAK' \
-              'ABAcgBCMABAQ&sclient=gws-wiz'
-    # Авст доллар
-    AVD_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B0%D0%B2%D1%81%D1%82%D1%80%D0%B0%D0%BB%D0' \
-              '%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B3%D0%BE+%D0%B4%D0%BE%D0%BB%D0%BB%D0%B0%D1%80%D0%B0+%D0%BA+%D1%80%D1%83' \
-              '%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvKmncuGJ2TwrTkhFg8CSKOQ0CPFRA%3A1633949973005&e' \
-              'i=FBlkYcvyPOumrgSaxr3wBg&oq=%D0%BA%D1%83%D1%80%D1%81+%D0%B0%D0%B2%D1%81%D1%82%D1%80%D0%B0%D0%BB%D0%B8%' \
-              'D0%B9%D1%81%D0%BA%D0%BE%D0%B3%D0%BE+%D0%B4%D0%BE%D0%BB%D0%BB%D0%B0%D1%80%D0%B0+%D0%BA+%D1%80%D1%83%D0%' \
-              'B1%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAMYADIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAcQ' \
-              'HjIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIICAAQCBAHEB46BwgAEEcQsAM6BwgAELADEEM6BAgAEA1KBAhBGABQgYEFWNOHBWCYjg' \
-              'VoBHACeACAAU2IAZYCkgEBNJgBAKABAcgBCsABAQ&sclient=gws-wiz'
-    # Гонконский доллар
-    GOD_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B3%D0%BE%D0%BD%D0%BA%D0%BE%D0%BD%D0%B3+%D' \
-              '0%B4%D0%BE%D0%BB%D0%BB%D0%B0%D1%80%D0%B0+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU89' \
-              '3&sxsrf=AOaemvKlYA8VkGzLfraDPzRkUoQw4tTdQw%3A1633950057399&ei=aRlkYeTkF62SrgSfx5u4BQ&oq=%D0%BA%D1%83%D' \
-              '1%80%D1%81+%D0%B3%D0%BE%D0%BD%D0%BA%D0%BE%D0%BD%D0%B3+%D0%B4%D0%BE%D0%BB%D0%BB%D0%B0%D1%80%D0%B0+%D0%B' \
-              'A+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAMYATIGCAAQDRAeMggIABAIEA0QHjoHCAAQRxCwAzoHCAAQsA' \
-              'MQQzoECAAQDToGCAAQBxAeOggIABAHEAoQHjoFCAAQzQJKBAhBGABQ7aIDWKy0A2DPwgNoAXACeACAAZEBiAHBA5IBAzQuMZgBAKAB' \
-              'AcgBCsABAQ&sclient=gws-wiz'
-    # ринггит
-    RIN_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D1%80%D0%B8%D0%BD%D0%B3%D0%B3%D0%B8%D1%82+%D' \
-              '0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvJBwPDYxUk5CDQ7UTJT7XYb0ABXaQ%' \
-              '3A1633950115755&ei=oxlkYfLELef1qwGwq6KQBA&oq=%D0%BA%D1%83%D1%80%D1%81+%D1%80%D0%B8%D0%BD%D0%B3%D0%B3%D' \
-              '0%B8%D1%82+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAMYADIGCAAQDRAeMggIABAIEA0QHjIICA' \
-              'AQCBANEB4yCAgAEAgQDRAeOgcIABBHELADOgYIABAHEB46CAgAEAcQChAeOgoIABAIEAcQChAeOggIABAIEAcQHjoECAAQDUoECEEY' \
-              'AFD1zQ1YnNsNYIXhDWgDcAJ4AIABkgGIAYgEkgEDNS4xmAEAoAEByAEIwAEB&sclient=gws-wiz'
-    # Гульден
-    GUL_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%B3%D1%83%D0%BB%D1%8C%D0%B4%D0%B5%D0%BD+%D' \
-              '0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvJXTra7KDRL1OYzExbHpmkDsZz0_w%' \
-              '3A1633950341925&ei=hRpkYczkN_SGwPAPq6mu0AU&ved=0ahUKEwiMu9etm8LzAhV0AxAIHauUC1oQ4dUDCA4&uact=5&oq=%D0%' \
-              'BA%D1%83%D1%80%D1%81+%D0%B3%D1%83%D0%BB%D1%8C%D0%B4%D0%B5%D0%BD+%D0%BA+%D1%80%D1%83%D0%B1%D0%BB%D1%8E&' \
-              'gs_lcp=Cgdnd3Mtd2l6EAMyBggAEAcQHjIICAAQCBAHEB4yBggAEAgQHjoHCAAQRxCwAzoECAAQDUoECEEYAFCJ_QRY8YUFYIOKBWg' \
-              'BcAJ4AIABmgGIAboEkgEDNi4xmAEAoAEByAEIwAEB&sclient=gws-wiz'
-    # Лари
-    LAR_RUB = 'https://www.google.com/search?q=%D0%BA%D1%83%D1%80%D1%81+%D0%BB%D0%B0%D1%80%D0%B8+%D0%BA+%D1%80%D1%83%' \
-              'D0%B1%D0%BB%D1%8E&rlz=1C1CHBD_ruRU893RU893&sxsrf=AOaemvKsJMhX6pkT7saOSVUJkOHT5tV9gw%3A1633950425815&ei' \
-              '=2RpkYa2bMaeMrwS594rAAw&oq=%D0%BA%D1%83%D1%80%D1%81+%D0%BB%D0%B0%D1%80%D0%B8+%D0%BA+%D1%80%D1%83%D0%B1' \
-              '%D0%BB%D1%8E&gs_lcp=Cgdnd3Mtd2l6EAEYADIECAAQDTIECAAQDTIECAAQDTIECAAQDTIECAAQDTIECAAQDTIECAAQDTIECAAQDT' \
-              'IECAAQDTIECAAQDToHCAAQRxCwAzoGCAAQDRAeOggIABANEAUQHjoICAAQCBANEB5KBAhBGABQl_ADWPjyA2Cn-wNoAXACeACAAU-I' \
-              'AaYCkgEBNJgBAKABAcgBBMABAQ&sclient=gws-wiz'
-
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-                             ' Chrome/94.0.4606.71 Safari/537.36'}
-
     def parse_currency(self, c):
+        import mainDataBase
         """парсит страничку со значениями"""
         if c == 'd':
-            full_page = requests.get(self.DOLLAR_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.DOLLAR_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'e':
-            full_page = requests.get(self.EURO_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.EURO_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'dir':
-            full_page = requests.get(self.DIR_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.DIR_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'dra':
-            full_page = requests.get(self.DRA_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.DRA_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'lir':
-            full_page = requests.get(self.LIR_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.LIR_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'pes':
-            full_page = requests.get(self.PES_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.PES_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'bat':
-            full_page = requests.get(self.BAT_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.BAT_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'fst':
-            full_page = requests.get(self.FST_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.FST_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'shf':
-            full_page = requests.get(self.SHF_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.SHF_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'ien':
-            full_page = requests.get(self.IEN_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.IEN_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'avd':
-            full_page = requests.get(self.AVD_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.AVD_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'god':
-            full_page = requests.get(self.GOD_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.GOD_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'rin':
-            full_page = requests.get(self.RIN_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.RIN_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'gul':
-            full_page = requests.get(self.GUL_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.GUL_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'lar':
-            full_page = requests.get(self.LAR_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.LAR_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         elif c == 'y' or 'юань':
-            full_page = requests.get(self.CNY_RUB, headers=self.headers)  # Парсим всю страницу
+            full_page = requests.get(mainDataBase.CNY_RUB, headers=mainDataBase.headers)  # Парсим всю страницу
             return self.parse_currency2(full_page)
         else:
-            return '404 Error'
+            return '404 Error'  # random error, but lucks like good AHAHHAHAHAHHA
 
     def parse_currency2(self, val):
         """Я просто не знаю, как подругому избавиться от повторения кода"""
