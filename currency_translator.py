@@ -2,4 +2,4 @@
 
 
 def check():
-    print("I think, is work!)")
+    print("Betta)")
