@@ -4,10 +4,6 @@ from k import k
 import parse
 
 bot = telebot.TeleBot(k)  # Указываем токен
-first = [""]
-second = [""]
-second_add = [""]
-third = [""]
 
 
 @bot.message_handler(commands=["start"])
@@ -18,7 +14,7 @@ def inline(message):
     but_2 = types.InlineKeyboardButton(text="страна - валюта", callback_data="Country")
     key.add(but_1, but_2)
     bot.send_message(message.chat.id, "Что бы вы хотели?)", reply_markup=key)
-    """/start"""
+    """/start  """
 
 
 @bot.callback_query_handler(func=lambda c: True)
